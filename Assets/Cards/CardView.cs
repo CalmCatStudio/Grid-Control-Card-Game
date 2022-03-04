@@ -11,11 +11,23 @@ public class CardView : MonoBehaviour
 
     public void Setup(CardScriptableObject cardInfo)
     {
+        SetupArrows(cardInfo);
+    }
+
+    private void SetupArrows(CardScriptableObject cardInfo)
+    {
         int count = arrowRenderers.Length;
         for (int i = 0; i < count; i++)
         {
-            int direction = (int)cardInfo.Arrows[i];
-            arrowRenderers[i].sprite = arrowSprites[direction];
+            SetArrowPowerSprite(cardInfo, i);
         }
+    }
+
+    private void SetArrowPowerSprite(CardScriptableObject cardInfo, int i)
+    {
+        Arrow arrow = cardInfo.Arrows[i];
+        ArrowPower power = arrow.Power;
+        int powerToInt = (int)power;
+        arrowRenderers[i].sprite = arrowSprites[powerToInt];
     }
 }

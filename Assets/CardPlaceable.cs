@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(Card))]
-public class CardHandler : MonoBehaviour, IPlaceable
+public class CardPlaceable : MonoBehaviour, IPlaceable
 {
     private Card card = null;
     public Card Card => card;

@@ -14,13 +14,32 @@ public class CardScriptableObject : ScriptableObject
     public Sprite FieldImage => fieldImage;
 
     [SerializeField, Tooltip("The arrows go Clockwise: Up, Right, Down, Left")]
-    private ArrowType[] arrows = new ArrowType[4];
-    public ArrowType[] Arrows => arrows;
+    private Arrow[] arrows = new Arrow[4];
+    public Arrow[] Arrows => arrows;
 }
 
-public enum ArrowType
+[System.Serializable]
+public class Arrow
+{
+    [SerializeField]
+    private ArrowPower power = ArrowPower.None;
+    public ArrowPower Power => power;
+
+    [SerializeField]
+    private ArrowEffect effect = ArrowEffect.None;
+    public ArrowEffect Effect => effect;
+}
+
+public enum ArrowPower
 {
     None,
     Single,
     Double
+}
+
+public enum ArrowEffect
+{
+    None,
+    Bomb,
+    Push
 }
