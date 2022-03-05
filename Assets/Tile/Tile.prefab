@@ -334,9 +334,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6205398849876814768}
+  - component: {fileID: 912144890580790029}
   - component: {fileID: 6205398849876814775}
   - component: {fileID: 6205398849876814773}
-  - component: {fileID: 912144890580790029}
   m_Layer: 8
   m_Name: Tile
   m_TagString: Untagged
@@ -360,36 +360,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6205398849876814775
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6205398849876814769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fd12d8a7d0da6a341a033525ff70820b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  backGroundCollider: {fileID: 912144890580790029}
-  directionalColliders:
-  - {fileID: 6349243648014693852}
-  - {fileID: 7898804635617422212}
-  - {fileID: 2080225529257035788}
-  - {fileID: 491922520997357784}
---- !u!114 &6205398849876814773
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6205398849876814769}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bf633e33afa94da4e855f5b67fcb88a8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!61 &912144890580790029
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -416,6 +386,37 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &6205398849876814775
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6205398849876814769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fd12d8a7d0da6a341a033525ff70820b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  directionalColliders:
+  - {fileID: 6349243648014693852}
+  - {fileID: 7898804635617422212}
+  - {fileID: 2080225529257035788}
+  - {fileID: 491922520997357784}
+--- !u!114 &6205398849876814773
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6205398849876814769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf633e33afa94da4e855f5b67fcb88a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: 0
+  backgroundRenderer: {fileID: 6205398850222023331}
 --- !u!1 &6205398850220727456
 GameObject:
   m_ObjectHideFlags: 0

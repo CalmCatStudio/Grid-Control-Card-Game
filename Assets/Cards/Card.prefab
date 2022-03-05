@@ -485,6 +485,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 998030528933690256}
+  - component: {fileID: 5112717195190707938}
   - component: {fileID: 998030528933690262}
   - component: {fileID: 998030528933690263}
   - component: {fileID: 998030528933690261}
@@ -512,6 +513,27 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!50 &5112717195190707938
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 998030528933690257}
+  m_BodyType: 1
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 1
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 0
 --- !u!61 &998030528933690262
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -572,6 +594,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 21300000, guid: 28e0dff61c406b54eaaf01f980533a22, type: 3}
   - {fileID: 21300000, guid: eef5592eac08a3943bca4256782704e1, type: 3}
+  cardSnapToPositionSpeed: 0.5
 --- !u!114 &1749238544485849033
 MonoBehaviour:
   m_ObjectHideFlags: 0

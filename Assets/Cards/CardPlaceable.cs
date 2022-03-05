@@ -33,7 +33,7 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
         pointerLocationOffset = transform.position - pointerPosition;
     }
 
-    public void EnterFocus(Transform pointerTransform, IPlaceable pointerHeldObject)
+    public void OnEnterFocus(Transform pointerTransform, IPlaceable pointerHeldObject)
     {
         if (isSelected || this.pointerTransform == null)
         {
@@ -41,7 +41,7 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
         }
     }
 
-    public void ExitFocus()
+    public void OnExitFocus()
     {
         if (!isSelected)
         {
@@ -61,13 +61,15 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
     public void Unselected(Transform placementArea = null)
     {
         isSelected = false;
-        if (placementArea == null)
-        {
-            card.ReturnCardToStartingLocation();
-        }
-        else
-        {
-            card.PlaceCard(placementArea.position);
-        }
+        Vector3? position = placementArea?.position;
+        card.PlaceCard(position);
+        //if (placementArea == null)
+        //{
+        //    card.ReturnCardToStartingLocation();
+        //}
+        //else
+        //{
+        //    card.PlaceCard(placementArea.position);
+        //}
     }
 }

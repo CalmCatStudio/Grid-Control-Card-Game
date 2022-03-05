@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class CardView : MonoBehaviour
 {
@@ -9,7 +8,18 @@ public class CardView : MonoBehaviour
     [SerializeField, Tooltip("Refer to The ArrowType Enum for the order: None, Single, Double")]
     private Sprite[] arrowSprites;
 
-    public void Setup(CardScriptableObject cardInfo)
+    [SerializeField]
+    private float cardSnapToPositionSpeed = .5f;
+
+    private Tween cardPlacedTween = null;
+
+    public void MoveCard(Vector3 destination)
+    {
+        // This might need to be handled more carefully if more movement is added.
+        cardPlacedTween = transform.DOMove(destination, .5f);
+    }
+
+    public void SetupView(CardScriptableObject cardInfo)
     {
         SetupArrows(cardInfo);
     }
@@ -19,15 +29,8 @@ public class CardView : MonoBehaviour
         int count = arrowRenderers.Length;
         for (int i = 0; i < count; i++)
         {
-            SetArrowPowerSprite(cardInfo, i);
+            Arrow arrow = cardInfo.Arrows[i];
+            arrowRenderers[i].sprite = arrowSprites[(int)arrow.Power];
         }
-    }
-
-    private void SetArrowPowerSprite(CardScriptableObject cardInfo, int i)
-    {
-        Arrow arrow = cardInfo.Arrows[i];
-        ArrowPower power = arrow.Power;
-        int powerToInt = (int)power;
-        arrowRenderers[i].sprite = arrowSprites[powerToInt];
     }
 }

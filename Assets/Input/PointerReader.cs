@@ -44,7 +44,7 @@ public class PointerReader : MonoBehaviour
                         hoverTarget = newHoverTarget;
                     }
                     // Tell the new target it is in focus.
-                    hoverTarget.EnterFocus(transform, placeableHeld);
+                    hoverTarget.OnEnterFocus(transform, placeableHeld);
                 }
             }
             else
@@ -61,7 +61,7 @@ public class PointerReader : MonoBehaviour
     {
         if (hoverTarget != null)
         {
-            hoverTarget.ExitFocus();
+            hoverTarget.OnExitFocus();
             hoverTarget = null;
         }
     }
@@ -115,13 +115,14 @@ public class PointerReader : MonoBehaviour
                     var placementArea = pointerClickTarget as IPlacementArea;
                     if (placementArea != null)
                     {
-                        placementArea.PlaceSelectable(placeableHeld);
+                        placementArea.Place(placeableHeld);
                     }
                     else
                     {
                         placeableHeld.Unselected();
                     }
                     placeableHeld = null;
+                    ResetPointerFocus();
                 }
                 break;
         }

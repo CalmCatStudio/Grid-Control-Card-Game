@@ -24,7 +24,7 @@ public class Card : MonoBehaviour
     {
         view = GetComponent<CardView>();
         cardCollider = GetComponent<Collider2D>();
-        view.Setup(cardInfo);
+        view.SetupView(cardInfo);
 
         this.cardInfo = cardInfo;
         gameObject.name = cardInfo.CardName;
@@ -32,15 +32,19 @@ public class Card : MonoBehaviour
         startingLocation = transform.position;
     }
 
-    public void PlaceCard(Vector3 position)
+    public void PlaceCard(Vector3? destination)
     {
-        // TODO: Tell the view to tween our position to the new position rather than do Position work here.
-        transform.position = position;
-        cardCollider.enabled = false;
-    }
+        if (destination == null)
+        {
+            cardCollider.enabled = false;
+            view.MoveCard(startingLocation);
+            cardCollider.enabled = true;
+        }
+        else
+        {
+            cardCollider.enabled = false;
+            view.MoveCard((Vector3)destination);
+        }
 
-    public void ReturnCardToStartingLocation()
-    {
-        transform.position = startingLocation;
     }
 }

@@ -6,8 +6,6 @@ using UnityEngine;
 public class TilePlacementArea : MonoBehaviour, IPlacementArea
 {
     private Tile tile = null;
-    [SerializeField]
-    private Collider2D backGroundCollider = null;
     [SerializeField, Tooltip("Place the colliders Clockwise starting at Up")]
     private Collider2D[] directionalColliders = new Collider2D[4];
 
@@ -23,25 +21,25 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
 
     public void Clicked(PointerClickAction pointerAction, Vector3 pointerPosition)
     {
-        // TODO: Clicked might be obsolete, but I have to see.
+        // TODO: Show Tile information
+
         // The offset is the localPosition on the clickable that was clicked
         //var offset = transform.position - pointerPosition;
-        //print($"Pointer Action: {pointerAction}");
-        //print($" Clickable Target Name: {gameObject.name} Collider Clicked: {colliderFocused.name}");
     }
 
-    public void EnterFocus(Transform pointerTransform, IPlaceable placeable = null)
+    public void OnEnterFocus(Transform pointerTransform, IPlaceable placeable = null)
     {
         ResetFocus();
-        EvaluatePointerFocus(pointerTransform.position);
+        EvaluatePointerPosition(pointerTransform.position);
         HandleFocus(placeable);
     }
 
-    public void ExitFocus()
+    public void OnExitFocus()
     {
-        tile.UndoPreview();
+        tile.OnExitPreview();
         ResetFocus();
     }
+
     private void ResetFocus()
     {
         previousColliderFocused = colliderFocused;
@@ -59,35 +57,52 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
         // Prevent the same action from looping if we are on the same collider
         if (colliderFocused != previousColliderFocused)
         {
-            tile.UndoPreview();
-            if (placeable != null)
+            tile.OnExitPreview();
+            if (directionFocused == null)
             {
-                var cardPlaceable = placeable as CardPlaceable;
-                if (cardPlaceable == null)
-                {
-                    return;
-                }
-                
-                tile.ViewPreviewPlaceHoldable(cardPlaceable, directionFocused);
+                return;
             }
+
+            if (placeable == null)
+            {
+                return;
+            }
+
+            var cardPlaceable = placeable as CardPlaceable;
+            if (cardPlaceable == null)
+            {
+                return;
+            }
+
+            tile.OnPreviewPlacement(cardPlaceable, (Direction)directionFocused);
+
         }
     }
 
-    private void EvaluatePointerFocus(Vector3 pointerPosition)
+    /// <summary>
+    /// Loop through each collider on the Tile and see which one the pointer is inside.
+    /// </summary>
+    private void EvaluatePointerPosition(Vector3 pointerPosition)
     {
         int count = directionalColliders.Length;
         for (int i = 0; i < count; i++)
         {
             var collider = directionalColliders[i];
+
+            // Escape if we have found a collider.
             if (collider.OverlapPoint(pointerPosition))
             {
                 directionFocused = (Direction)i;
                 colliderFocused = collider;
+                break;
             }
         }
     }
 
-    public void PlaceSelectable(IPlaceable placeable)
+    /// <summary>
+    /// Try to place an IPlaceable. If it fails the IPlaceable will have its Unselected method called.
+    /// </summary>
+    public void Place(IPlaceable placeable)
     {
         var cardPlaceable = placeable as CardPlaceable;
         if (cardPlaceable == null)
@@ -95,7 +110,7 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
             return;
         }
 
-        bool placed = tile.ConfirmPush();
+        bool placed = tile.OnConfirmPlacement();
 
         if (!placed)
         {
