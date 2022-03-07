@@ -17,6 +17,8 @@ public class Tile : MonoBehaviour
     [SerializeField]
     private SpriteRenderer backgroundRenderer = null;
 
+    // TODO: PUSH Send the tile to the card when it is place maybe?
+
     private void Awake()
     {
         // TODO: Make a TileView for this work.
@@ -49,6 +51,8 @@ public class Tile : MonoBehaviour
             }
         }
 
+        // When pushed from one direction; An object is pushing towards the opposite side.
+        Direction directionPushing = (Direction)DirectionHelper.GetOppositeDirection(directionPushed);
         // If there is no card on the tile; Then it will accept any new card.
         if (currentCardHandler == null) 
         {
@@ -56,19 +60,28 @@ public class Tile : MonoBehaviour
             return true; 
         }
 
-        // When pushed from one direction; An object is pushing towards the opposite side.
-        Direction directionPushing = (Direction)DirectionHelper.GetOppositeDirection(directionPushed);
-        neighborPushed = neighbors[(int)directionPushing];
-        // If there is no neigbor in the direction then we refuse the card.
-        if (neighborPushed == null)
-        {
-            return false;
-        }
-
         // While pushing we use the strongest arrow we have come accross for every push after that.
         // If the strongest arrow loses to this card; Then we refuse the new card.
         strongestArrowPushing = GetStrongestArrowInDirection(newCard, directionPushing, strongestArrowPushing);
         if (!CheckIfNewArrowBeatsCurrentArrow(strongestArrowPushing, directionPushed))
+        {
+            return false;
+        }
+
+        if (newCard != null)
+        {
+            // Bomb arrows destroy cards they beat; So end recursion here because there is nothing to push.
+            if (newCard.Card.Arrows[(int)directionPushing].Effect == ArrowEffect.Bomb)
+            {
+                currentCardHandler.Unselected();
+                SetPreviewCard(newCard);
+                return true;
+            }
+        }
+
+        neighborPushed = neighbors[(int)directionPushing];
+        // If there is no neigbor in the direction then we refuse the card.
+        if (neighborPushed == null)
         {
             return false;
         }
@@ -114,9 +127,7 @@ public class Tile : MonoBehaviour
             return false;
         }
 
-        ConfirmPlacement();
-        neighborPushed?.OnConfirmPlacement();
-        neighborPushed = null;
+        HandlePush();
 
         return true;
     }
@@ -125,7 +136,38 @@ public class Tile : MonoBehaviour
     {
         currentCardHandler = previewCardHandler;
         previewCardHandler = null;
-        currentCardHandler.Unselected(transform);
+        currentCardHandler?.Unselected(transform);
+
+        if (currentCardHandler == null)
+        {
+            return;
+        }    
+
+        //TODO: Add push.
+        //for (int i = 0; i < 4; i++)
+        //{
+        //    var arrow = currentCardHandler.Card.Arrows[i];
+        //    if (arrow.Effect == ArrowEffect.Push)
+        //    {
+        //        print($"Push {(Direction)i}");
+        //        var neighbor = neighbors[i];
+        //        if (neighbor != null)
+        //        {
+        //            if (neighbor.OnPreviewPlacement(null, (Direction)i, arrow.Power))
+        //            {
+        //                neighbor.HandlePush();
+        //                print("Push succesful");
+        //            }
+        //        }
+        //    }
+        //}
+    }
+
+    public void HandlePush()
+    {
+        neighborPushed?.OnConfirmPlacement();
+        neighborPushed = null;
+        ConfirmPlacement();
     }
 
     public void OnExitPreview()
@@ -192,6 +234,11 @@ public class Tile : MonoBehaviour
     /// <returns>The strongest arrow provided</returns>
     private ArrowPower GetStrongestArrowInDirection(CardPlaceable newCard, Direction directionToPush, ArrowPower strongestArrowInPush)
     {
+        if (newCard == null)
+        {
+            return strongestArrowInPush;
+        }
+
         // When a card is placed it needs to use the opposite edge in the battle.
         // IE: If the card was placed on the left of this tile; Then it will use its right arrow to push this left arrow.
         Arrow newArrow = newCard.Card.Arrows[(int)directionToPush];

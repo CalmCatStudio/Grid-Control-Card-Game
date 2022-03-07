@@ -16,9 +16,9 @@ MonoBehaviour:
   fieldImage: {fileID: 0}
   arrows:
   - power: 2
-    effect: 0
+    effect: 2
   - power: 2
-    effect: 0
+    effect: 2
   - power: 0
     effect: 0
   - power: 0
