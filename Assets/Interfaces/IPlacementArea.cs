@@ -1,4 +1,4 @@
 public interface IPlacementArea : IClickable
 {
-    public void Place(IPlaceable selectableToPlace);
+    public void PlaceObject(IPlaceable selectableToPlace);
 }

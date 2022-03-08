@@ -7,11 +7,9 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
 {
     private Card card = null;
     public Card Card => card;
-    private bool isSelected = false;
 
-    private Transform pointerTransform = null;
     private Vector3
-        pointerLocationOffset = Vector3.zero;
+        pointerLocationOnCard = Vector3.zero;
 
     private void Awake()
     {
@@ -20,45 +18,31 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
 
     public void Clicked(PointerClickAction pointerAction, Vector3 pointerPosition)
     {
-        // The offset is the localPosition on the clickable that was clicked
         if (pointerAction == PointerClickAction.ClickDown)
         {
-            pointerLocationOffset = transform.position - pointerPosition;
-            isSelected = true;
+            pointerLocationOnCard = transform.position - pointerPosition;
         }
     }
 
     public void OnEnterFocus(Transform pointerTransform, IPlaceable pointerHeldObject)
     {
-        if (isSelected || this.pointerTransform == null)
-        {
-            this.pointerTransform = pointerTransform;
-        }
+        // TODO: Show Card information if pointer isn't holding something.
     }
 
     public void OnExitFocus()
     {
-        if (!isSelected)
-        {
-            pointerTransform = null;
-        }
+        // TODO: Hide Card information.
     }
 
     public void Move(Vector3 destination)
     {
-        var currentPosition = destination + pointerLocationOffset;
+        // This prevents the card from snapping to the pointer position.
+        var currentPosition = destination + pointerLocationOnCard;
         transform.position = currentPosition;
     }
 
     public void Place(Vector3? destination = null)
     {
-        isSelected = false;
-        Vector3? position = null;
-        if (destination != null)
-        {
-            position = destination;
-        }
-
-        card.PlaceCard(position);
+        card.PlaceCard(destination);
     }
 }

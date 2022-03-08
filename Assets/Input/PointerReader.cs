@@ -9,9 +9,9 @@ public class PointerReader : MonoBehaviour
     private Vector2 position = Vector2.zero;
 
     private IFocusable
-        currentFocusTarget = null;
+        currentFocus = null;
     private IPlaceable
-        placeableHeld = null;
+        heldObject = null;
 
 
     private void Awake()
@@ -26,7 +26,7 @@ public class PointerReader : MonoBehaviour
     public void OnMovePointer(InputAction.CallbackContext context)
     {
         // Checking for mainCam is needed to avoid an error on scene switching
-        if (mainCam == null)
+        if (!mainCam)
         {
             return;
         }
@@ -37,14 +37,16 @@ public class PointerReader : MonoBehaviour
 
         EvaluatePointerFocus();
 
-        if (placeableHeld != null)
+
+        if (heldObject != null)
         {
-            placeableHeld.Move(position);
+            heldObject.Move(position);
         }
     }
 
     private void EvaluatePointerFocus()
     {
+        // Shoot Raycast at position, and exit if nothing is hit.
         var hit = Physics2D.Raycast(position, Vector3.forward, 50);
         if (!hit)
         {
@@ -52,17 +54,19 @@ public class PointerReader : MonoBehaviour
             return;
         }
 
+        // Exit if hit was not focusable.
         if (!hit.collider.TryGetComponent(out IFocusable newFocusTarget))
         {
             return;
         }
 
-        if (newFocusTarget != currentFocusTarget)
+        // If the focus is new.
+        if (newFocusTarget != currentFocus)
         {
             ResetPointerFocus();
-            currentFocusTarget = newFocusTarget;
+            currentFocus = newFocusTarget;
         }
-        currentFocusTarget.OnEnterFocus(transform, placeableHeld);
+        currentFocus.OnEnterFocus(transform, heldObject);
     }
 
     /// <summary>
@@ -70,10 +74,10 @@ public class PointerReader : MonoBehaviour
     /// </summary>
     private void ResetPointerFocus()
     {
-        if (currentFocusTarget != null)
+        if (currentFocus != null)
         {
-            currentFocusTarget.OnExitFocus();
-            currentFocusTarget = null;
+            currentFocus.OnExitFocus();
+            currentFocus = null;
         }
     }
 
@@ -84,7 +88,8 @@ public class PointerReader : MonoBehaviour
         {
             Click(PointerClickAction.ClickDown);
         }
-        else if (context.canceled) /* Click Up */
+        /* Click Up */
+        else if (context.canceled) 
         {
             Click(PointerClickAction.ClickUp);
         }
@@ -92,11 +97,19 @@ public class PointerReader : MonoBehaviour
 
     private void Click(PointerClickAction action)
     {
-        if (currentFocusTarget == null) { return; }
+        // Exit if there is no focus
+        if (currentFocus == null) 
+        {
+            return; 
+        }
 
-        // Try to click the target. Exit the method if it isn't clickable.
-        var pointerClickTarget = currentFocusTarget as IClickable;
-        if (pointerClickTarget == null) { return; }
+
+        // Exit the method if it isn't clickable.
+        var pointerClickTarget = currentFocus as IClickable;
+        if (pointerClickTarget == null) 
+        { 
+            return; 
+        }
         pointerClickTarget.Clicked(action, position);
 
         HandleSelectable(action, pointerClickTarget);
@@ -107,28 +120,27 @@ public class PointerReader : MonoBehaviour
         switch (action)
         {
             case PointerClickAction.ClickDown:
-                if (placeableHeld == null)
+                if (heldObject == null)
                 {
                     // If the pointerTarget is an IPlaceable; Then select it.
-                    placeableHeld = clickTarget as IPlaceable;
+                    heldObject = clickTarget as IPlaceable;
                 }
                 break;
             case PointerClickAction.ClickUp:
                 // If an IPlaceable is currently held.
-                if (placeableHeld != null)
+                if (heldObject != null)
                 {
                     // If the pointerClickTarget is an IPlacementArea; Then place it
-                    // Otherwise Unselect it
-                    var placeCurrentlyFocused = clickTarget as IPlacementArea;
-                    if (placeCurrentlyFocused != null)
+                    var placementAreaFocused = clickTarget as IPlacementArea;
+                    if (placementAreaFocused != null)
                     {
-                        placeCurrentlyFocused.Place(placeableHeld);
+                        placementAreaFocused.PlaceObject(heldObject);
                     }
-                    else
+                    else /* No placement area found. */
                     {
-                        placeableHeld.Place();
+                        heldObject.Place();
                     }
-                    placeableHeld = null;
+                    heldObject = null;
                     ResetPointerFocus();
                 }
                 break;

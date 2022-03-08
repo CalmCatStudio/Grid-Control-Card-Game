@@ -4,15 +4,15 @@
 public class Arrow
 {
     [SerializeField]
-    private ArrowPower power = ArrowPower.None;
-    public ArrowPower Power => power;
+    private ArrowStrength power = ArrowStrength.None;
+    public ArrowStrength Power => power;
 
     [SerializeField]
     private ArrowEffect effect = ArrowEffect.None;
     public ArrowEffect Effect => effect;
 }
 
-public enum ArrowPower
+public enum ArrowStrength
 {
     None,
     Single,

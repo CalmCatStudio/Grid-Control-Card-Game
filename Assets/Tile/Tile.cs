@@ -56,11 +56,11 @@ public class Tile : MonoBehaviour
     /// It is recursive, and will check each neighbor until either an empty space, or an obstacle it found.
     /// </summary>
     /// <returns>True if an empty space is found</returns>
-    public bool TryToPreviewPush(CardPlaceable cardToPlace, Direction edgePushed, ArrowPower strongestArrowPushing = ArrowPower.None)
+    public bool TryToPreviewPush(CardPlaceable cardToPlace, Direction edgePushed, ArrowStrength strongestArrowPushing = ArrowStrength.None)
     {
         // If currentCard is null Accept any card.
         // Exit Recursion.
-        if (currentCardHandler == null)
+        if (!currentCardHandler)
         {
             previewCardHandler = cardToPlace;
             return true;
@@ -78,7 +78,7 @@ public class Tile : MonoBehaviour
         }
 
         // Check for relevant card effects.
-        if (cardToPlace != null)
+        if (cardToPlace)
         {
             // Bomb arrows destroy cards they beat
             // End recursion here because there is nothing to push.
@@ -93,7 +93,7 @@ public class Tile : MonoBehaviour
 
         // Exit if neighbor is null.
         neighborToPush = neighbors[(int)directionPushing];
-        if (neighborToPush == null)
+        if (!neighborToPush)
         {
             return false;
         }
@@ -119,7 +119,7 @@ public class Tile : MonoBehaviour
         previewCardHandler = cardToPlace;
 
         // This makes it so we skip the initial card getting pulled from the players hand when previewing a move.
-        if (neighborToPush != null)
+        if (neighborToPush)
         {
             neighborToPush.SetNeighborCardInPreview();
         }
@@ -140,7 +140,7 @@ public class Tile : MonoBehaviour
     /// <returns>Returns true if placement was succesful.</returns>
     public bool OnConfirmPlacement()
     {
-        if (previewCardHandler == null)
+        if (!previewCardHandler)
         {
             return false;
         }
@@ -159,7 +159,7 @@ public class Tile : MonoBehaviour
 
             // Exit if there is no neigbor in the direction.
             var neighbor = neighbors[i];
-            if (neighbor == null)
+            if (!neighbor)
             {                
                 continue;
             }
@@ -181,7 +181,7 @@ public class Tile : MonoBehaviour
     public void ConfirmPush()
     {
         // Tell neighbor about the push.
-        if (neighborToPush != null)
+        if (neighborToPush)
         {
             neighborToPush.ConfirmPush();
             neighborToPush = null;
@@ -192,7 +192,7 @@ public class Tile : MonoBehaviour
         previewCardHandler = null;
         
         // Place the new card if it exists.
-        if (currentCardHandler != null)
+        if (currentCardHandler)
         {
             currentCardHandler.Place(transform.position);
         }
@@ -201,14 +201,14 @@ public class Tile : MonoBehaviour
     public void OnExitPreview()
     {
         // Return the current card to its proper position if it exists.
-        if (currentCardHandler != null)
+        if (currentCardHandler)
         {
             currentCardHandler.Place(transform.position);
             previewCardHandler = null;
         }
 
         // Tell neighbor to exit the preview.
-        if (neighborToPush != null)
+        if (neighborToPush)
         {
             neighborToPush.OnExitPreview();
             neighborToPush = null;
@@ -251,10 +251,10 @@ public class Tile : MonoBehaviour
     }
 
     // TODO: Make an Arrow Utility Class!!!
-    private bool CheckIfNewArrowBeatsCurrentArrow(ArrowPower strongestArrowPushing, Direction currentCardArrowPushed)
+    private bool CheckIfNewArrowBeatsCurrentArrow(ArrowStrength strongestArrowPushing, Direction currentCardArrowPushed)
     {
         Arrow currentArrow = currentCardHandler.Card.Arrows[(int)currentCardArrowPushed];
-        ArrowPower currentArrowPower = currentArrow.Power;
+        ArrowStrength currentArrowPower = currentArrow.Power;
         //print($"New Card arrow: {strongestArrowPushing} Current Card Arrow: {currentArrowPower}");
 
         if (strongestArrowPushing > currentArrowPower)
@@ -269,9 +269,9 @@ public class Tile : MonoBehaviour
     /// Returns the stronger arrow between the given card, and the given strongest arrow.
     /// </summary>
     /// <returns>The strongest arrow provided</returns>
-    private ArrowPower GetStrongestArrowInDirection(CardPlaceable newCard, Direction directionToPush, ArrowPower strongestArrowInPush)
+    private ArrowStrength GetStrongestArrowInDirection(CardPlaceable newCard, Direction directionToPush, ArrowStrength strongestArrowInPush)
     {
-        if (newCard == null)
+        if (!newCard)
         {
             return strongestArrowInPush;
         }
@@ -279,7 +279,7 @@ public class Tile : MonoBehaviour
         // When a card is placed it needs to use the opposite edge in the battle.
         // IE: If the card was placed on the left of this tile; Then it will use its right arrow to push this left arrow.
         Arrow newArrow = newCard.Card.Arrows[(int)directionToPush];
-        ArrowPower newArrowPower = newArrow.Power;
+        ArrowStrength newArrowPower = newArrow.Power;
         if (newArrowPower > strongestArrowInPush)
         {
             strongestArrowInPush = newArrowPower;

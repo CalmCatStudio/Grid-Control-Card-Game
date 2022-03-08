@@ -21,7 +21,7 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
 
     public void Clicked(PointerClickAction pointerAction, Vector3 pointerPosition)
     {
-        // TODO: Show Tile information
+        // TODO: Activate Tile information (Create Tile information =D)
 
         // The offset is the localPosition on the clickable that was clicked
         //var offset = transform.position - pointerPosition;
@@ -49,7 +49,7 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
 
     private void HandleFocus(IPlaceable placeable)
     {
-        if (colliderFocused == null)
+        if (!colliderFocused)
         {
             return;
         }
@@ -68,8 +68,9 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
                 return;
             }
 
+            // Exit if the placeable is not valid for this placement area.
             var cardPlaceable = placeable as CardPlaceable;
-            if (cardPlaceable == null)
+            if (!cardPlaceable)
             {
                 return;
             }
@@ -102,10 +103,10 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
     /// <summary>
     /// Try to place an IPlaceable. If it fails the IPlaceable will have its Unselected method called.
     /// </summary>
-    public void Place(IPlaceable placeable)
+    public void PlaceObject(IPlaceable placeable)
     {
         var cardPlaceable = placeable as CardPlaceable;
-        if (cardPlaceable == null)
+        if (!cardPlaceable)
         {
             return;
         }

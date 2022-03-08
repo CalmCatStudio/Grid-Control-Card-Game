@@ -9,14 +9,14 @@ public class CardView : MonoBehaviour
     private Sprite[] arrowSprites;
 
     [SerializeField]
-    private float cardSnapToPositionSpeed = .5f;
+    private float cardSnapToDestinationSpeed = .5f;
 
     private Tween cardPlacedTween = null;
 
     public void MoveCard(Vector3 destination)
     {
         // This might need to be handled more carefully if more movement is added.
-        cardPlacedTween = transform.DOMove(destination, cardSnapToPositionSpeed);
+        cardPlacedTween = transform.DOMove(destination, cardSnapToDestinationSpeed);
     }
 
     public void SetupView(CardScriptableObject cardInfo)

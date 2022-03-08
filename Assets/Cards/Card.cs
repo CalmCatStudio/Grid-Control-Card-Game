@@ -38,23 +38,11 @@ public class Card : MonoBehaviour
         if (destination != null)
         {
             view.MoveCard((Vector3)destination);
-            return;
         }
-
-        view.MoveCard(startingLocation);
-        cardCollider.enabled = true;
-
-        //if (destination == null)
-        //{
-        //    //cardCollider.enabled = false;
-        //    view.MoveCard(startingLocation);
-        //    cardCollider.enabled = true;
-        //}
-        //else
-        //{
-        //    //cardCollider.enabled = false;
-        //    view.MoveCard((Vector3)destination);
-        //}
-
+        else
+        {
+            view.MoveCard(startingLocation);
+            cardCollider.enabled = true;
+        }
     }
 }
