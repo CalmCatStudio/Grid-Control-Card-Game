@@ -74,7 +74,7 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
                 return;
             }
 
-            tile.OnPreviewPlacement(cardPlaceable, (Direction)directionFocused);
+            tile.OnPreviewCardPlacement(cardPlaceable, (Direction)directionFocused);
 
         }
     }

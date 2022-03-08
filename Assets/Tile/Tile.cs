@@ -11,13 +11,11 @@ public class Tile : MonoBehaviour
     private CardPlaceable 
         currentCardHandler = null,
         previewCardHandler = null;
-    private Tile neighborPushed = null;
+    private Tile neighborToPush = null;
 
     // TODO: This is view work.
     [SerializeField]
     private SpriteRenderer backgroundRenderer = null;
-
-    // TODO: PUSH Send the tile to the card when it is place maybe?
 
     private void Awake()
     {
@@ -31,92 +29,112 @@ public class Tile : MonoBehaviour
     }
 
     /// <summary>
-    /// This is initially called by an IPlacement area. 
-    /// Then recursively pushes along a path until it finds an empty tile, or a blockade.
+    /// This is called by an IPlacement area. 
+    /// It recursively pushes along a path until it finds an empty tile, or a blockade.
     /// </summary>
-    /// <param name="newCard">The card to be placed on the tile</param>
-    /// <param name="directionPushed">The edge that was pushed on the tile</param>
+    /// <param name="cardToPlace">The card to be placed on the tile</param>
+    /// <param name="edgePushed">The edge that was pushed on the tile</param>
     /// <returns>If every push was succesful then this will return true</returns>
-    public bool OnPreviewPlacement(CardPlaceable newCard, Direction directionPushed, ArrowPower strongestArrowPushing = ArrowPower.None)
+    public bool OnPreviewCardPlacement(CardPlaceable cardToPlace, Direction edgePushed)
     {
-        // TODO: This seems like a poor way to determine first push, but it will do for now
-        // It works because an empty arrow can not push, and the First Push does have an arrow yet. Recursive Pushes all have an Arrow power greater than None.
-        // The first push.
-        if (strongestArrowPushing == ArrowPower.None)
-        {
-            // If the Tile is dead; Then we can not directly place a card on it. (Pushing into is allowed.)
-            if (type == TileType.Dead)
-            {
-                return false;
-            }
-        }
-
-        // When pushed from one direction; An object is pushing towards the opposite side.
-        Direction directionPushing = (Direction)DirectionHelper.GetOppositeDirection(directionPushed);
-        // If there is no card on the tile; Then it will accept any new card.
-        if (currentCardHandler == null) 
-        {
-            previewCardHandler = newCard;
-            return true; 
-        }
-
-        // While pushing we use the strongest arrow we have come accross for every push after that.
-        // If the strongest arrow loses to this card; Then we refuse the new card.
-        strongestArrowPushing = GetStrongestArrowInDirection(newCard, directionPushing, strongestArrowPushing);
-        if (!CheckIfNewArrowBeatsCurrentArrow(strongestArrowPushing, directionPushed))
+        // If the Tile is dead; Then we can not directly place a card on it.
+        if (type == TileType.Dead)
         {
             return false;
         }
 
-        if (newCard != null)
+        if (!TryToPreviewPush(cardToPlace, edgePushed))
         {
-            // Bomb arrows destroy cards they beat; So end recursion here because there is nothing to push.
-            if (newCard.Card.Arrows[(int)directionPushing].Effect == ArrowEffect.Bomb)
+            return false;
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Attempts to Push the newCard onto the Tile. 
+    /// It is recursive, and will check each neighbor until either an empty space, or an obstacle it found.
+    /// </summary>
+    /// <returns>True if an empty space is found</returns>
+    public bool TryToPreviewPush(CardPlaceable cardToPlace, Direction edgePushed, ArrowPower strongestArrowPushing = ArrowPower.None)
+    {
+        // If currentCard is null Accept any card.
+        // Exit Recursion.
+        if (currentCardHandler == null)
+        {
+            previewCardHandler = cardToPlace;
+            return true;
+        }
+
+        // When pushed from one direction; An object is pushing towards the opposite side.
+        // IE: If pushed from the top; Then the cardToPlace wants to use its bottom arrow to try to push with.
+        Direction directionPushing = (Direction)DirectionHelper.GetDirectionPushing(edgePushed);
+
+        // Exit if the push cannot beat this arrow.
+        strongestArrowPushing = GetStrongestArrowInDirection(cardToPlace, directionPushing, strongestArrowPushing);
+        if (!CheckIfNewArrowBeatsCurrentArrow(strongestArrowPushing, edgePushed))
+        {
+            return false;
+        }
+
+        // Check for relevant card effects.
+        if (cardToPlace != null)
+        {
+            // Bomb arrows destroy cards they beat
+            // End recursion here because there is nothing to push.
+            if (cardToPlace.Card.Arrows[(int)directionPushing].Effect == ArrowEffect.Bomb)
             {
+                // This is where the card on the tile gets destroyed by the bomb.
                 currentCardHandler.Unselected();
-                SetPreviewCard(newCard);
+                SetupPreview(cardToPlace);
                 return true;
             }
         }
 
-        neighborPushed = neighbors[(int)directionPushing];
-        // If there is no neigbor in the direction then we refuse the card.
-        if (neighborPushed == null)
+        // Exit if neighbor is null.
+        neighborToPush = neighbors[(int)directionPushing];
+        if (neighborToPush == null)
         {
             return false;
         }
 
         // This method will keep going recursively until a neighbor accepts the card, or outright refuses it.
-        if (!neighborPushed.OnPreviewPlacement(currentCardHandler, directionPushed, strongestArrowPushing))
+        if (!neighborToPush.TryToPreviewPush(currentCardHandler, edgePushed, strongestArrowPushing))
         {
             return false;
         }
 
-        SetPreviewCard(newCard);
+        // The push was succesful.
+        SetupPreview(cardToPlace);
         return true;
     }
 
     /// <summary>
-    /// The preview card will only get set if the push is legal.
+    /// This Sets up the newCard as the preview card, and shows every placement after the first one. The first one does not show the preview, because the player is holding it.
     /// </summary>
-    /// <param name="previewCard"></param>
+    /// <param name="cardToPlace"></param>
     /// <param name="neighborPushed"></param>
-    private void SetPreviewCard(CardPlaceable previewCard)
+    private void SetupPreview(CardPlaceable cardToPlace)
     {
-        previewCardHandler = previewCard;
+        previewCardHandler = cardToPlace;
 
-        if (neighborPushed != null)
+        // This makes it so we skip the initial card getting pulled from the players hand when previewing a move.
+        if (neighborToPush != null)
         {
-            neighborPushed.PreviewPushing();
+            neighborToPush.SetNeighborCardInPreview();
         }
     }
 
-    public void PreviewPushing()
+    /// <summary>
+    /// This is called by a neighbor during a preview of a push.
+    /// </summary>
+    public void SetNeighborCardInPreview()
     {
         previewCardHandler.Unselected(transform);
     }
 
     /// <summary>
+    /// Called by an IPlacementArea.
     /// Confirms the push that was already getting previewed.
     /// </summary>
     /// <returns>Returns true if placement was succesful.</returns>
@@ -127,55 +145,74 @@ public class Tile : MonoBehaviour
             return false;
         }
 
-        HandlePush();
+        ConfirmPush();
+
+        // When a card is first place on the board Check all of its arrows for relevant effects.
+        for (int i = 0; i < 4; i++)
+        {
+            // Exit if we don't have a push arrow.
+            var arrow = currentCardHandler.Card.Arrows[i];
+            if (arrow.Effect != ArrowEffect.Push)
+            {
+                continue;
+            }
+
+            // Exit if there is no neigbor in the direction.
+            var neighbor = neighbors[i];
+            if (neighbor == null)
+            {                
+                continue;
+            }
+
+            // Exit if push fails.
+            var directionPushing = (Direction)i;
+            var directionPushed = DirectionHelper.GetDirectionPushing(directionPushing);
+            if (!neighbor.TryToPreviewPush(null, directionPushed, arrow.Power))
+            {
+                continue;
+            }
+
+            neighbor.ConfirmPush();
+        }
 
         return true;
     }
 
-    private void ConfirmPlacement()
+    public void ConfirmPush()
     {
+        // Tell neighbor about the push.
+        if (neighborToPush != null)
+        {
+            neighborToPush.ConfirmPush();
+            neighborToPush = null;
+        }
+
+        // Handle new card placement.
         currentCardHandler = previewCardHandler;
         previewCardHandler = null;
-        currentCardHandler?.Unselected(transform);
-
-        if (currentCardHandler == null)
+        
+        // Place the new card if it exists.
+        if (currentCardHandler != null)
         {
-            return;
-        }    
-
-        //TODO: Add push.
-        //for (int i = 0; i < 4; i++)
-        //{
-        //    var arrow = currentCardHandler.Card.Arrows[i];
-        //    if (arrow.Effect == ArrowEffect.Push)
-        //    {
-        //        print($"Push {(Direction)i}");
-        //        var neighbor = neighbors[i];
-        //        if (neighbor != null)
-        //        {
-        //            if (neighbor.OnPreviewPlacement(null, (Direction)i, arrow.Power))
-        //            {
-        //                neighbor.HandlePush();
-        //                print("Push succesful");
-        //            }
-        //        }
-        //    }
-        //}
-    }
-
-    public void HandlePush()
-    {
-        neighborPushed?.OnConfirmPlacement();
-        neighborPushed = null;
-        ConfirmPlacement();
+            currentCardHandler.Unselected(transform);
+        }
     }
 
     public void OnExitPreview()
     {
-        currentCardHandler?.Unselected(transform);
-        previewCardHandler = null;
-        neighborPushed?.OnExitPreview();
-        neighborPushed = null;
+        // Return the current card to its proper position if it exists.
+        if (currentCardHandler != null)
+        {
+            currentCardHandler.Unselected(transform);
+            previewCardHandler = null;
+        }
+
+        // Tell neighbor to exit the preview.
+        if (neighborToPush != null)
+        {
+            neighborToPush.OnExitPreview();
+            neighborToPush = null;
+        }
     }
 
     /// <summary>

@@ -55,21 +55,19 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
 
     public void Selected()
     {
+        // Selected could be replaced by Clicked. ISelectable could just add Unselected to the interface.
         isSelected = true;
     }
 
     public void Unselected(Transform placementArea = null)
     {
         isSelected = false;
-        Vector3? position = placementArea?.position;
+        Vector3? position = null;
+        if (placementArea != null)
+        {
+            position = placementArea.position;
+        }
+
         card.PlaceCard(position);
-        //if (placementArea == null)
-        //{
-        //    card.ReturnCardToStartingLocation();
-        //}
-        //else
-        //{
-        //    card.PlaceCard(placementArea.position);
-        //}
     }
 }

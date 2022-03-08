@@ -11,7 +11,7 @@ public static class DirectionHelper
     /// </summary>
     /// <param name="direction">The direction you want the opposite of.</param>
     /// <returns>The opposite of the direction passed</returns>
-    public static Direction GetOppositeDirection(Direction direction)
+    public static Direction GetDirectionPushing(Direction direction)
     {
         int oppositeDirection = 0;
         int directionAsInt = (int)direction;
