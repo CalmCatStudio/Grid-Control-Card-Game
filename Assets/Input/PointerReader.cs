@@ -9,7 +9,7 @@ public class PointerReader : MonoBehaviour
     private Vector2 position = Vector2.zero;
 
     private IFocusable
-        hoverTarget = null;
+        currentFocusTarget = null;
     private IPlaceable
         placeableHeld = null;
 
@@ -26,32 +26,43 @@ public class PointerReader : MonoBehaviour
     public void OnMovePointer(InputAction.CallbackContext context)
     {
         // Checking for mainCam is needed to avoid an error on scene switching
-        if (mainCam != null)
+        if (mainCam == null)
         {
-            position = mainCam.ScreenToWorldPoint(context.ReadValue<Vector2>());
-            // Transform gets moved with the pointer, because it is used for positioning things later.
-            transform.position = position;
-            var hit = Physics2D.Raycast(position, Vector3.forward, 50);
-            if (hit)
-            {                
-                // Check if this is a hoverable Target.
-                if (hit.collider.TryGetComponent(out IFocusable newHoverTarget))
-                {
-                    // If we already had a hover target; Then tell the old target it is no longer in focus.
-                    if (newHoverTarget != hoverTarget)
-                    {
-                        ResetPointerFocus();
-                        hoverTarget = newHoverTarget;
-                    }
-                    // Tell the new target it is in focus.
-                    hoverTarget.OnEnterFocus(transform, placeableHeld);
-                }
-            }
-            else
-            {
-                ResetPointerFocus();
-            }
+            return;
         }
+
+        position = mainCam.ScreenToWorldPoint(context.ReadValue<Vector2>());
+        // Transform gets moved with the pointer, because it is used for positioning things later.
+        transform.position = position;
+
+        EvaluatePointerFocus();
+
+        if (placeableHeld != null)
+        {
+            placeableHeld.Move(position);
+        }
+    }
+
+    private void EvaluatePointerFocus()
+    {
+        var hit = Physics2D.Raycast(position, Vector3.forward, 50);
+        if (!hit)
+        {
+            ResetPointerFocus();
+            return;
+        }
+
+        if (!hit.collider.TryGetComponent(out IFocusable newFocusTarget))
+        {
+            return;
+        }
+
+        if (newFocusTarget != currentFocusTarget)
+        {
+            ResetPointerFocus();
+            currentFocusTarget = newFocusTarget;
+        }
+        currentFocusTarget.OnEnterFocus(transform, placeableHeld);
     }
 
     /// <summary>
@@ -59,10 +70,10 @@ public class PointerReader : MonoBehaviour
     /// </summary>
     private void ResetPointerFocus()
     {
-        if (hoverTarget != null)
+        if (currentFocusTarget != null)
         {
-            hoverTarget.OnExitFocus();
-            hoverTarget = null;
+            currentFocusTarget.OnExitFocus();
+            currentFocusTarget = null;
         }
     }
 
@@ -81,17 +92,17 @@ public class PointerReader : MonoBehaviour
 
     private void Click(PointerClickAction action)
     {
-        if (hoverTarget == null) { return; }
+        if (currentFocusTarget == null) { return; }
 
         // Try to click the target. Exit the method if it isn't clickable.
-        var pointerClickTarget = hoverTarget as IClickable;
+        var pointerClickTarget = currentFocusTarget as IClickable;
         if (pointerClickTarget == null) { return; }
         pointerClickTarget.Clicked(action, position);
 
         HandleSelectable(action, pointerClickTarget);
     }
 
-    private void HandleSelectable(PointerClickAction action, IClickable pointerClickTarget)
+    private void HandleSelectable(PointerClickAction action, IClickable clickTarget)
     {
         switch (action)
         {
@@ -99,11 +110,7 @@ public class PointerReader : MonoBehaviour
                 if (placeableHeld == null)
                 {
                     // If the pointerTarget is an IPlaceable; Then select it.
-                    placeableHeld = pointerClickTarget as IPlaceable;
-                    if (placeableHeld != null)
-                    {
-                        placeableHeld.Selected();
-                    }
+                    placeableHeld = clickTarget as IPlaceable;
                 }
                 break;
             case PointerClickAction.ClickUp:
@@ -112,14 +119,14 @@ public class PointerReader : MonoBehaviour
                 {
                     // If the pointerClickTarget is an IPlacementArea; Then place it
                     // Otherwise Unselect it
-                    var placementArea = pointerClickTarget as IPlacementArea;
-                    if (placementArea != null)
+                    var placeCurrentlyFocused = clickTarget as IPlacementArea;
+                    if (placeCurrentlyFocused != null)
                     {
-                        placementArea.Place(placeableHeld);
+                        placeCurrentlyFocused.Place(placeableHeld);
                     }
                     else
                     {
-                        placeableHeld.Unselected();
+                        placeableHeld.Place();
                     }
                     placeableHeld = null;
                     ResetPointerFocus();

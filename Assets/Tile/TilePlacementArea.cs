@@ -115,7 +115,7 @@ public class TilePlacementArea : MonoBehaviour, IPlacementArea
         if (!placed)
         {
             //print("Placement failed");
-            placeable.Unselected();
+            placeable.Place();
         }
     }
 }

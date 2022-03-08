@@ -16,7 +16,7 @@ public class CardView : MonoBehaviour
     public void MoveCard(Vector3 destination)
     {
         // This might need to be handled more carefully if more movement is added.
-        cardPlacedTween = transform.DOMove(destination, .5f);
+        cardPlacedTween = transform.DOMove(destination, cardSnapToPositionSpeed);
     }
 
     public void SetupView(CardScriptableObject cardInfo)

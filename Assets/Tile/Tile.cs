@@ -85,7 +85,7 @@ public class Tile : MonoBehaviour
             if (cardToPlace.Card.Arrows[(int)directionPushing].Effect == ArrowEffect.Bomb)
             {
                 // This is where the card on the tile gets destroyed by the bomb.
-                currentCardHandler.Unselected();
+                currentCardHandler.Place();
                 SetupPreview(cardToPlace);
                 return true;
             }
@@ -130,7 +130,7 @@ public class Tile : MonoBehaviour
     /// </summary>
     public void SetNeighborCardInPreview()
     {
-        previewCardHandler.Unselected(transform);
+        previewCardHandler.Place(transform.position);
     }
 
     /// <summary>
@@ -194,7 +194,7 @@ public class Tile : MonoBehaviour
         // Place the new card if it exists.
         if (currentCardHandler != null)
         {
-            currentCardHandler.Unselected(transform);
+            currentCardHandler.Place(transform.position);
         }
     }
 
@@ -203,7 +203,7 @@ public class Tile : MonoBehaviour
         // Return the current card to its proper position if it exists.
         if (currentCardHandler != null)
         {
-            currentCardHandler.Unselected(transform);
+            currentCardHandler.Place(transform.position);
             previewCardHandler = null;
         }
 

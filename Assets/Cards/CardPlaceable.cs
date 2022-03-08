@@ -18,19 +18,14 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
         card = GetComponent<Card>();    
     }
 
-    private void Update()
-    {
-        if (isSelected)
-        {
-            var currentPosition = pointerTransform.position + pointerLocationOffset;
-            transform.position = currentPosition;
-        }
-    }
-
     public void Clicked(PointerClickAction pointerAction, Vector3 pointerPosition)
     {
         // The offset is the localPosition on the clickable that was clicked
-        pointerLocationOffset = transform.position - pointerPosition;
+        if (pointerAction == PointerClickAction.ClickDown)
+        {
+            pointerLocationOffset = transform.position - pointerPosition;
+            isSelected = true;
+        }
     }
 
     public void OnEnterFocus(Transform pointerTransform, IPlaceable pointerHeldObject)
@@ -47,25 +42,21 @@ public class CardPlaceable : MonoBehaviour, IPlaceable
         {
             pointerTransform = null;
         }
-        else if (pointerTransform != null)
-        {
-            transform.position = pointerTransform.position + pointerLocationOffset;
-        }
     }
 
-    public void Selected()
+    public void Move(Vector3 destination)
     {
-        // Selected could be replaced by Clicked. ISelectable could just add Unselected to the interface.
-        isSelected = true;
+        var currentPosition = destination + pointerLocationOffset;
+        transform.position = currentPosition;
     }
 
-    public void Unselected(Transform placementArea = null)
+    public void Place(Vector3? destination = null)
     {
         isSelected = false;
         Vector3? position = null;
-        if (placementArea != null)
+        if (destination != null)
         {
-            position = placementArea.position;
+            position = destination;
         }
 
         card.PlaceCard(position);
