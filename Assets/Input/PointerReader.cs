@@ -47,7 +47,7 @@ public class PointerReader : MonoBehaviour
     private void EvaluatePointerFocus()
     {
         // Shoot Raycast at position, and exit if nothing is hit.
-        var hit = Physics2D.Raycast(position, Vector3.forward, 50);
+        var hit = Physics2D.Raycast(position, Vector3.forward, 10);
         if (!hit)
         {
             ResetPointerFocus();

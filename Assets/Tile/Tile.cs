@@ -7,11 +7,15 @@ public class Tile : MonoBehaviour
 {
     [SerializeField]
     private TileType type = TileType.Normal;
-    private List<Tile> neighbors = new List<Tile>();
+
+    /// <summary>
+    /// Contains tiles from the surrounding Directions. It will contain null if nothing is in the direction.
+    /// </summary>
+    private List<Tile> surroundingTiles = new List<Tile>();
     private CardPlaceable 
         currentCardHandler = null,
         previewCardHandler = null;
-    private Tile neighborToPush = null;
+    private Tile tileToPush = null;
 
     // TODO: This is view work.
     [SerializeField]
@@ -25,7 +29,7 @@ public class Tile : MonoBehaviour
             backgroundRenderer.color = Color.grey;
         }
 
-        GetTileNeighbors();
+        GetSurroundingTiles();
     }
 
     /// <summary>
@@ -92,14 +96,14 @@ public class Tile : MonoBehaviour
         }
 
         // Exit if neighbor is null.
-        neighborToPush = neighbors[(int)directionPushing];
-        if (!neighborToPush)
+        tileToPush = surroundingTiles[(int)directionPushing];
+        if (!tileToPush)
         {
             return false;
         }
 
         // This method will keep going recursively until a neighbor accepts the card, or outright refuses it.
-        if (!neighborToPush.TryToPreviewPush(currentCardHandler, edgePushed, strongestArrowPushing))
+        if (!tileToPush.TryToPreviewPush(currentCardHandler, edgePushed, strongestArrowPushing))
         {
             return false;
         }
@@ -119,9 +123,9 @@ public class Tile : MonoBehaviour
         previewCardHandler = cardToPlace;
 
         // This makes it so we skip the initial card getting pulled from the players hand when previewing a move.
-        if (neighborToPush)
+        if (tileToPush)
         {
-            neighborToPush.SetNeighborCardInPreview();
+            tileToPush.SetNeighborCardInPreview();
         }
     }
 
@@ -157,9 +161,9 @@ public class Tile : MonoBehaviour
                 continue;
             }
 
-            // Exit if there is no neigbor in the direction.
-            var neighbor = neighbors[i];
-            if (!neighbor)
+            // Exit if there is no neighbor in the direction.
+            var tileInPushEffect = surroundingTiles[i];
+            if (!tileInPushEffect)
             {                
                 continue;
             }
@@ -167,12 +171,12 @@ public class Tile : MonoBehaviour
             // Exit if push fails.
             var directionPushing = (Direction)i;
             var directionPushed = DirectionHelper.GetDirectionPushing(directionPushing);
-            if (!neighbor.TryToPreviewPush(null, directionPushed, arrow.Power))
+            if (!tileInPushEffect.TryToPreviewPush(null, directionPushed, arrow.Power))
             {
                 continue;
             }
 
-            neighbor.ConfirmPush();
+            tileInPushEffect.ConfirmPush();
         }
 
         return true;
@@ -181,10 +185,10 @@ public class Tile : MonoBehaviour
     public void ConfirmPush()
     {
         // Tell neighbor about the push.
-        if (neighborToPush)
+        if (tileToPush)
         {
-            neighborToPush.ConfirmPush();
-            neighborToPush = null;
+            tileToPush.ConfirmPush();
+            tileToPush = null;
         }
 
         // Handle new card placement.
@@ -208,45 +212,45 @@ public class Tile : MonoBehaviour
         }
 
         // Tell neighbor to exit the preview.
-        if (neighborToPush)
+        if (tileToPush)
         {
-            neighborToPush.OnExitPreview();
-            neighborToPush = null;
+            tileToPush.OnExitPreview();
+            tileToPush = null;
         }
     }
 
     /// <summary>
     /// Loop through all directions, and get any neighbors from those directions.
     /// </summary>
-    private void GetTileNeighbors()
+    private void GetSurroundingTiles()
     {  
         for (int i = 0; i < 4; i++)
         {
             var direction = DirectionHelper.GetVector3FromDirection((Direction)i);
-            AddNeighborInDirection(direction);
+            AddTileInDirection(direction);
         }
     }
 
     /// <summary>
-    /// Adds the neigbor, or null to the list of neigbors.
+    /// Adds the neighbor, or null to the list of neigbors.
     /// </summary>
-    private void AddNeighborInDirection(Vector3 direction)
+    private void AddTileInDirection(Vector3 direction)
     {
         var hit = Physics2D.Raycast(transform.position + direction, direction, 1);
         if (hit)
         {
             if (hit.collider.TryGetComponent(out Tile neighbor))
             {
-                neighbors.Add(neighbor);
+                surroundingTiles.Add(neighbor);
             }
             else
             {
-                neighbors.Add(null);
+                surroundingTiles.Add(null);
             }
         }
         else
         {
-            neighbors.Add(null);
+            surroundingTiles.Add(null);
         }
     }
 

@@ -8,7 +8,7 @@ public class Card : MonoBehaviour
     private CardView view = null;
     [SerializeField]
     private CardScriptableObject cardInfo = null;
-    private Vector3 startingLocation = Vector3.zero;
+    private Vector3 defaultLocation = Vector3.zero;
     private Arrow[] arrows = null;
     public Arrow[] Arrows => arrows;
     private Collider2D cardCollider = null;
@@ -26,12 +26,27 @@ public class Card : MonoBehaviour
         cardCollider = GetComponent<Collider2D>();
         view.SetupView(cardInfo);
 
+        // Set this object up based on the Scriptable Object given.
         this.cardInfo = cardInfo;
         gameObject.name = cardInfo.CardName;
         arrows = cardInfo.Arrows;
-        startingLocation = transform.position;
+        
+        // TODO: This is for testing, and will be removed
+        // Set the starting locationg to its location when Play is pressed.
+        defaultLocation = transform.position;
     }
 
+    public void DrawCard(Vector3 destination)
+    {
+        // TODO: This is for the Deck that still needs to be created.
+        defaultLocation = destination;
+        view.MoveCard(destination);
+    }
+
+    /// <summary>
+    /// Place the card at the given destination.
+    /// If null the card will return to its original location.
+    /// </summary>
     public void PlaceCard(Vector3? destination)
     {
         cardCollider.enabled = false;
@@ -41,7 +56,7 @@ public class Card : MonoBehaviour
         }
         else
         {
-            view.MoveCard(startingLocation);
+            view.MoveCard(defaultLocation);
             cardCollider.enabled = true;
         }
     }
